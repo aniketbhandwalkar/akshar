@@ -2,15 +2,15 @@ import jsPDF from 'jspdf';
 import { TestResult, User } from '../types';
 
 // Generate QR code data URL (placeholder - in production use proper QR library)
-const generateQRCode = (text: string): string => {
-  return `data:image/svg+xml;base64,${btoa(`
-    <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-      <rect width="80" height="80" fill="#000"/>
-      <rect x="5" y="5" width="70" height="70" fill="#fff"/>
-      <text x="40" y="45" text-anchor="middle" fill="#000" font-size="6">QR CODE</text>
-    </svg>
-  `)}`;
-};
+// const generateQRCode = (text: string): string => {
+//   return `data:image/svg+xml;base64,${btoa(`
+//     <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+//       <rect width="80" height="80" fill="#000"/>
+//       <rect x="5" y="5" width="70" height="70" fill="#fff"/>
+//       <text x="40" y="45" text-anchor="middle" fill="#000" font-size="6">QR CODE</text>
+//     </svg>
+//   `)}`;
+// };
 
 // Mock function to get clinician data (replace with actual Gemini API call)
 const getCliniciansNearUser = async (userArea: string) => {

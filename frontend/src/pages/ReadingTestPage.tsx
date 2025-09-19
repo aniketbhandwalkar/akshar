@@ -162,7 +162,7 @@ const ReadingTestPage: React.FC = () => {
   const [showResult, setShowResult] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [showReadinessModal, setShowReadinessModal] = useState(false);
-  const [currentGaze, setCurrentGaze] = useState<{x: number, y: number} | null>(null);
+  // const [currentGaze, setCurrentGaze] = useState<{x: number, y: number} | null>(null);
   
   const startTimeRef = useRef<number>(0);
   const gazeDataRef = useRef<any[]>([]);
@@ -198,7 +198,7 @@ const ReadingTestPage: React.FC = () => {
       cleanup();
     };
     
-  }, [user, navigate]);
+  }, [user, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initializeTest = async () => {
     try {
@@ -330,7 +330,7 @@ const ReadingTestPage: React.FC = () => {
             }
             
             // Update current gaze for internal tracking
-            setCurrentGaze(gazePoint);
+            // setCurrentGaze(gazePoint);
             
             // Debug log (remove in production)
             if (gazeDataRef.current.length % 10 === 0 && gazeDataRef.current.length > 0) { // Log every 10 points
@@ -602,7 +602,7 @@ const ReadingTestPage: React.FC = () => {
     
     // Reset gaze data
     gazeDataRef.current = [];
-    setCurrentGaze(null);
+    // setCurrentGaze(null);
   };
 
   const handleReturnToDashboard = () => {

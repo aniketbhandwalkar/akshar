@@ -132,7 +132,7 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [show, currentStep]);
+  }, [show, currentStep, stream]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initializeCamera = async () => {
     try {
