@@ -5,12 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { Container, Button } from './shared/EnhancedStyledComponents';
 
 const NavbarContainer = styled.nav`
-  background: rgba(255, 255, 255, 0.95);
+  background: tranparent;
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   color: #1f2937;
-  padding: 1rem 0;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 0.35rem 0;   /* much smaller height */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -23,55 +23,59 @@ const NavContent = styled.div`
   align-items: center;
 `;
 
-const Logo = styled(Link)`
-  font-size: 1.8rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+const LogoLink = styled(Link)`
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  font-family: 'Poppins', sans-serif;
-  transition: all 0.3s ease;
-  
+  transition: transform 0.2s ease;
+
   &:hover {
-    text-decoration: none;
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
+`;
+
+const LogoImage = styled.img`
+  height: 32px;  /* shorter logo */
+  width: auto;
 `;
 
 const NavLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px; /* reduced spacing */
 `;
 
 const NavLink = styled(Link)<{ $active?: boolean }>`
   color: #4b5563;
   text-decoration: none;
   font-weight: 500;
-  padding: 10px 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  position: relative;
-  
-  ${props => props.$active && `
+  font-size: 0.9rem;  /* slightly smaller text */
+  padding: 4px 10px;  /* shorter clickable area */
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  ${(props) =>
+    props.$active &&
+    `
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
   `}
-  
+
   &:hover {
     background: rgba(102, 126, 234, 0.1);
     color: #667eea;
     text-decoration: none;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 `;
 
 const NavButton = styled(Button)`
-  margin-left: 8px;
+  margin-left: 6px;
+  padding: 6px 12px; /* smaller button size */
+  font-size: 0.85rem;
+  border-radius: 6px;
 `;
 
 interface NavbarProps {
@@ -94,11 +98,14 @@ const Navbar: React.FC<NavbarProps> = ({ showAuthButtons = false }) => {
     <NavbarContainer>
       <Container>
         <NavContent>
-          <Logo to="/">AKSHAR</Logo>
-          
+          {/* Logo */}
+          <LogoLink to="/">
+            <LogoImage src="/images/logo_akshar.png" alt="Akshar Logo" />
+          </LogoLink>
+
+          {/* Navigation Links */}
           <NavLinks>
             {user ? (
-              // Authenticated user navigation
               <>
                 <NavLink to="/dashboard" $active={isActive('/dashboard')}>
                   Home
@@ -118,7 +125,6 @@ const Navbar: React.FC<NavbarProps> = ({ showAuthButtons = false }) => {
                 </NavButton>
               </>
             ) : (
-              // Guest navigation
               <>
                 <NavLink to="/about" $active={isActive('/about')}>
                   About Us
@@ -128,16 +134,12 @@ const Navbar: React.FC<NavbarProps> = ({ showAuthButtons = false }) => {
                 </NavLink>
                 {showAuthButtons && (
                   <>
-                    <NavButton 
-                      as={Link} 
-                      to="/login" 
-                      variant="secondary"
-                    >
+                    <NavButton as={Link} to="/login" variant="secondary">
                       Login
                     </NavButton>
-                    <NavButton 
-                      as={Link} 
-                      to="/signup" 
+                    <NavButton
+                      as={Link}
+                      to="/signup"
                       style={{ backgroundColor: 'white', color: '#4f46e5' }}
                     >
                       Signup

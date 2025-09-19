@@ -19,6 +19,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Screener Questions
 export const getScreenerQuestions = async (): Promise<string[]> => {
   try {
     const response = await api.get('/tests/screener-questions');
@@ -28,6 +29,7 @@ export const getScreenerQuestions = async (): Promise<string[]> => {
   }
 };
 
+// Submit Screener Test
 export const submitScreenerTest = async (responses: string[]): Promise<TestResult> => {
   try {
     const response = await api.post('/tests/screener', { responses });
@@ -37,6 +39,7 @@ export const submitScreenerTest = async (responses: string[]): Promise<TestResul
   }
 };
 
+// Get Reading Passage
 export const getReadingPassage = async (): Promise<string> => {
   try {
     const response = await api.get('/tests/reading-passage');
@@ -46,6 +49,7 @@ export const getReadingPassage = async (): Promise<string> => {
   }
 };
 
+// Submit Reading Test
 export const submitReadingTest = async (
   eyeTrackingData: EyeTrackingData,
   readingPassage: string,
@@ -57,12 +61,13 @@ export const submitReadingTest = async (
       readingPassage,
       timeTaken,
     });
-    return response.data.testResult;
+    return response.data.testResult || response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Failed to submit reading test');
   }
 };
 
+// Get All Test Results
 export const getTestResults = async (): Promise<TestResult[]> => {
   try {
     const response = await api.get('/tests/results');
@@ -72,6 +77,7 @@ export const getTestResults = async (): Promise<TestResult[]> => {
   }
 };
 
+// Get Single Test Result
 export const getTestResult = async (id: string): Promise<TestResult> => {
   try {
     const response = await api.get(`/tests/result/${id}`);
@@ -81,6 +87,7 @@ export const getTestResult = async (id: string): Promise<TestResult> => {
   }
 };
 
+// Download PDF
 export const downloadTestResultPDF = async (id: string): Promise<Blob> => {
   try {
     const response = await api.get(`/tests/result/${id}/pdf`, {
@@ -89,5 +96,13 @@ export const downloadTestResultPDF = async (id: string): Promise<Blob> => {
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Failed to download PDF');
+  }
+};
+
+export const deleteTestResult = async (id: string): Promise<void> => {
+  try {
+    await api.delete(`/tests/result/${id}`);
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to delete test result');
   }
 };

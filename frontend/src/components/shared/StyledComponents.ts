@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 
 export const Container = styled.div`
   max-width: 1200px;
@@ -130,19 +130,19 @@ export const Text = styled.p`
   margin-bottom: 16px;
 `;
 
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
 export const LoadingSpinner = styled.div`
   border: 4px solid #f3f4f6;
   border-top: 4px solid #4f46e5;
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  ${css`animation: ${spin} 1s linear infinite;`}
   margin: 20px auto;
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 `;
 
 export const FlexContainer = styled.div<{ 

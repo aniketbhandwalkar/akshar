@@ -129,7 +129,7 @@ const SignupPage: React.FC = () => {
         <Container>
           <SignupCard hover>
             <Title gradient animated style={{ textAlign: 'center', marginBottom: '30px' }}>
-              🎆 Join AKSHAR Family
+               Join AKSHAR Family
             </Title>
             
             <Form onSubmit={handleSubmit}>
@@ -278,15 +278,7 @@ const SignupPage: React.FC = () => {
               backgroundColor: '#f3f4f6',
               borderRadius: '6px'
             }}>
-              <Text style={{ 
-                fontSize: '14px', 
-                color: '#6b7280',
-                margin: 0,
-                textAlign: 'center'
-              }}>
-                By creating an account, you agree to our Terms of Service 
-                and Privacy Policy. Your data is secure and protected.
-              </Text>
+              
             </div>
           </SignupCard>
         </Container>

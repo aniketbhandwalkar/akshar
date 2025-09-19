@@ -15,12 +15,10 @@ export const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
     background-color: #fafbfc;
   }
-
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 `;
 
 // Animations
-const fadeIn = keyframes`
+export const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 `;
@@ -69,14 +67,16 @@ export const Container = styled.div`
 `;
 
 // Animated Card with hover effects
-export const Card = styled.div<{ hover?: boolean; delay?: number }>`
+export const Card = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['hover', 'delay'].includes(prop),
+})<{ hover?: boolean; delay?: number }>`
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 32px;
   margin: 20px 0;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  ${props => css`animation: ${fadeIn} 0.6s ease-out ${props.delay || 0}s both;`}
+  ${props => props.delay !== undefined ? css`animation: ${fadeIn} 0.6s ease-out ${props.delay}s both;` : css`animation: ${fadeIn} 0.6s ease-out both;`}
   border: 1px solid rgba(255, 255, 255, 0.8);
   
   ${props => props.hover && `
@@ -93,7 +93,9 @@ export const Card = styled.div<{ hover?: boolean; delay?: number }>`
 `;
 
 // Gradient Button with enhanced animations
-export const Button = styled.button<{ 
+export const Button = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['variant', 'size', 'animated', 'hover'].includes(prop),
+})<{
   variant?: 'primary' | 'secondary' | 'danger' | 'gradient' | 'glass';
   size?: 'small' | 'medium' | 'large';
   animated?: boolean;
@@ -270,20 +272,20 @@ export const Text = styled.p<{ animated?: boolean; delay?: number }>`
   `}
 `;
 
-// Loading Spinner with modern design
+// Loading Spinner with modern design  
+const spinEnhanced = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
 export const LoadingSpinner = styled.div`
   border: 3px solid #f3f4f6;
   border-top: 3px solid #667eea;
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  ${css`animation: ${spinEnhanced} 1s linear infinite;`}
   margin: 20px auto;
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 `;
 
 // Floating Action Elements
@@ -394,7 +396,7 @@ export const ProgressBar = styled.div<{ progress: number; animated?: boolean }>`
     border-radius: 4px;
     transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
-    ${props => props.animated && `
+    ${props => props.animated && css`
       background-image: linear-gradient(45deg, rgba(255,255,255,.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.2) 50%, rgba(255,255,255,.2) 75%, transparent 75%, transparent);
       background-size: 20px 20px;
       animation: ${shimmer} 2s linear infinite;
@@ -430,7 +432,7 @@ export const Toast = styled.div<{ type: 'success' | 'error' | 'info' }>`
   color: white;
   font-weight: 500;
   z-index: 1100;
-  animation: ${slideIn} 0.3s ease-out;
+  ${css`animation: ${slideIn} 0.3s ease-out;`}
   
   ${props => props.type === 'success' && `
     background: linear-gradient(135deg, #10b981, #059669);
@@ -484,7 +486,7 @@ export const IconWrapper = styled.div<{ size?: 'small' | 'medium' | 'large'; ani
   color: white;
   margin-bottom: 16px;
   
-  ${props => props.animated && `
+  ${props => props.animated && css`
     animation: ${bounce} 2s infinite;
   `}
 `;
@@ -498,7 +500,7 @@ export const ErrorMessage = styled.div`
   padding: 12px 16px;
   font-size: 14px;
   margin-top: 8px;
-  animation: ${fadeIn} 0.3s ease-out;
+  ${css`animation: ${fadeIn} 0.3s ease-out;`}
 `;
 
 export const SuccessMessage = styled.div`
@@ -509,7 +511,7 @@ export const SuccessMessage = styled.div`
   padding: 12px 16px;
   font-size: 14px;
   margin-top: 8px;
-  animation: ${fadeIn} 0.3s ease-out;
+  ${css`animation: ${fadeIn} 0.3s ease-out;`}
 `;
 
 export const FormGroup = styled.div`

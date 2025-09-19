@@ -7,7 +7,7 @@ import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
 import ScreenerTestPage from './pages/ScreenerTestPage';
 import ReadingTestPage from './pages/ReadingTestPage';
-// import TestResultPage from './pages/TestResultPage';
+import TestResultPage from './pages/TestResultPage';
 import { LoadingSpinner, GlobalStyles } from './components/shared/EnhancedStyledComponents';
 
 // Protected Route Component
@@ -105,6 +105,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ReadingTestPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/test-result/:id" 
+              element={
+                <ProtectedRoute>
+                  <TestResultPage />
                 </ProtectedRoute>
               } 
             />

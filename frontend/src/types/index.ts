@@ -14,7 +14,8 @@ export interface AuthResponse {
 }
 
 export interface TestResult {
-  id: string;
+  id?: string;
+  _id?: string; // MongoDB ID field
   testType: 'screener' | 'reading';
   result: {
     hasDyslexia: boolean;
@@ -28,6 +29,7 @@ export interface TestResult {
     phone: string;
   };
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ScreenerResponse {
