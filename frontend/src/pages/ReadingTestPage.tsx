@@ -355,6 +355,14 @@ const ReadingTestPage: React.FC = () => {
       window.webgazer.showVideoPreview(true)
         .showPredictionPoints(true)
         .applyKalmanFilter(true);
+      // Prevent WebGazer from re-initializing if already running
+      try {
+        if (window.webgazer.params) {
+          window.webgazer.params.showGazeDot = true;
+        }
+      } catch (e) {
+        // ignore
+      }
       
       console.log('WebGazer preview enabled, starting calibration points...');
       
@@ -379,7 +387,19 @@ const ReadingTestPage: React.FC = () => {
         
         // Store calibration data
         for (let j = 0; j < 5; j++) {
-          await window.webgazer.recordScreenPosition(pointX, pointY);
+          try {
+            if (typeof window.webgazer.recordScreenPosition === 'function') {
+              await window.webgazer.recordScreenPosition(pointX, pointY);
+            } else if (typeof window.webgazer.recordScreenClick === 'function') {
+              // Fallback for older WebGazer versions
+              await window.webgazer.recordScreenClick(pointX, pointY);
+            } else if (typeof window.webgazer.addDataPoint === 'function') {
+              // Last-resort fallback
+              await window.webgazer.addDataPoint(pointX, pointY);
+            }
+          } catch (e) {
+            console.warn('Calibration data point failed, continuing...', e);
+          }
           await new Promise(resolve => setTimeout(resolve, 200));
         }
         

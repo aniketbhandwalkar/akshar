@@ -131,12 +131,25 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
+      if (videoRef.current) {
+        try {
+          // @ts-ignore
+          videoRef.current.srcObject = null;
+        } catch {}
+      }
     };
-  }, [show, currentStep, stream]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [show, currentStep]); // run only when modal visibility or step changes
 
   const initializeCamera = async () => {
     try {
       setSystemCheck(prev => ({ ...prev, camera: 'checking' }));
+      
+      // If there's an existing stream, stop it before requesting a new one
+      if (stream) {
+        try {
+          stream.getTracks().forEach(track => track.stop());
+        } catch {}
+      }
       
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
@@ -150,6 +163,7 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
       setSystemCheck(prev => ({ ...prev, camera: 'good' }));
       
       if (videoRef.current) {
+        // @ts-ignore
         videoRef.current.srcObject = mediaStream;
         videoRef.current.onloadedmetadata = () => {
           startQualityChecks();

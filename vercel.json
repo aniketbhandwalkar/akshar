@@ -14,14 +14,16 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/backend/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
-    }
+    { "src": "/api/(.*)", "dest": "/backend/server.js" },
+    // Serve static assets from the frontend build
+    { "src": "/static/(.*)", "dest": "/frontend/static/$1" },
+    { "src": "/favicon.ico", "dest": "/frontend/favicon.ico" },
+    { "src": "/asset-manifest.json", "dest": "/frontend/asset-manifest.json" },
+    { "src": "/manifest.json", "dest": "/frontend/manifest.json" },
+    { "src": "/logo(.*)", "dest": "/frontend/logo$1" },
+    { "src": "/images/(.*)", "dest": "/frontend/images/$1" },
+    // SPA fallback: send all other routes to index.html
+    { "src": "/(.*)", "dest": "/frontend/index.html" }
   ],
   "env": {
     "NODE_ENV": "production"
