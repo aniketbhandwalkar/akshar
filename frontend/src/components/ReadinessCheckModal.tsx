@@ -124,31 +124,6 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
   const [faceDetected, setFaceDetected] = useState(false);
   const [lightingQuality, setLightingQuality] = useState(0);
 
-  useEffect(() => {
-    if (show && currentStep === 2 && !cameraInitRef.current) {
-      cameraInitRef.current = true;
-      initializeCamera();
-    }
-
-    const videoEl = videoRef.current;
-
-    return () => {
-      cameraInitRef.current = false;
-      const currentStream = streamRef.current;
-      if (currentStream) {
-        try {
-          currentStream.getTracks().forEach(track => track.stop());
-        } catch {}
-        streamRef.current = null;
-      }
-      if (videoEl) {
-        try {
-          // @ts-ignore
-          videoEl.srcObject = null;
-        } catch {}
-      }
-    };
-  }, [show, currentStep, initializeCamera]);
 
   const initializeCamera = useCallback(async () => {
     try {
@@ -187,6 +162,32 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
       setSystemCheck(prev => ({ ...prev, camera: 'error' }));
     }
   }, []);
+
+  useEffect(() => {
+    if (show && currentStep === 2 && !cameraInitRef.current) {
+      cameraInitRef.current = true;
+      initializeCamera();
+    }
+
+    const videoEl = videoRef.current;
+
+    return () => {
+      cameraInitRef.current = false;
+      const currentStream = streamRef.current;
+      if (currentStream) {
+        try {
+          currentStream.getTracks().forEach(track => track.stop());
+        } catch {}
+        streamRef.current = null;
+      }
+      if (videoEl) {
+        try {
+          // @ts-ignore
+          videoEl.srcObject = null;
+        } catch {}
+      }
+    };
+  }, [show, currentStep, initializeCamera]);
 
   const startQualityChecks = () => {
     // Simulate lighting and positioning checks
