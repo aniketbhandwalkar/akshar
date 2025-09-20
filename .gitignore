@@ -1,1 +1,6 @@
 .vercel
+# Ignore env files
+.env
+.env.*
+frontend/.env*
+backend/.env*
