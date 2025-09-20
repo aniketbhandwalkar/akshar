@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   Card,
@@ -119,53 +119,66 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
   });
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const cameraInitRef = useRef(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [lightingQuality, setLightingQuality] = useState(0);
 
   useEffect(() => {
-    if (show && currentStep === 2) {
+    if (show && currentStep === 2 && !cameraInitRef.current) {
+      cameraInitRef.current = true;
       initializeCamera();
     }
-    
+
+    const videoEl = videoRef.current;
+
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      cameraInitRef.current = false;
+      const currentStream = streamRef.current;
+      if (currentStream) {
+        try {
+          currentStream.getTracks().forEach(track => track.stop());
+        } catch {}
+        streamRef.current = null;
       }
-      if (videoRef.current) {
+      if (videoEl) {
         try {
           // @ts-ignore
-          videoRef.current.srcObject = null;
+          videoEl.srcObject = null;
         } catch {}
       }
     };
-  }, [show, currentStep]); // run only when modal visibility or step changes
+  }, [show, currentStep, initializeCamera]);
 
-  const initializeCamera = async () => {
+  const initializeCamera = useCallback(async () => {
     try {
       setSystemCheck(prev => ({ ...prev, camera: 'checking' }));
-      
-      // If there's an existing stream, stop it before requesting a new one
-      if (stream) {
+
+      // Stop existing stream if present
+      if (streamRef.current) {
         try {
-          stream.getTracks().forEach(track => track.stop());
+          streamRef.current.getTracks().forEach(track => track.stop());
         } catch {}
+        streamRef.current = null;
       }
-      
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
           facingMode: 'user'
-        } 
+        }
       });
-      
+
+      streamRef.current = mediaStream;
       setStream(mediaStream);
       setSystemCheck(prev => ({ ...prev, camera: 'good' }));
-      
-      if (videoRef.current) {
+
+      const video = videoRef.current;
+      if (video) {
         // @ts-ignore
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.onloadedmetadata = () => {
+        video.srcObject = mediaStream;
+        (video as HTMLVideoElement).onloadedmetadata = () => {
           startQualityChecks();
         };
       }
@@ -173,7 +186,7 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
       console.error('Camera access failed:', error);
       setSystemCheck(prev => ({ ...prev, camera: 'error' }));
     }
-  };
+  }, []);
 
   const startQualityChecks = () => {
     // Simulate lighting and positioning checks
