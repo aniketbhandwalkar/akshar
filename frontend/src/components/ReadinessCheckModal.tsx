@@ -117,7 +117,6 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
     position: 'checking',
     stability: 'checking'
   });
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const cameraInitRef = useRef(false);
@@ -146,7 +145,6 @@ const ReadinessCheckModal: React.FC<ReadinessCheckModalProps> = ({
       });
 
       streamRef.current = mediaStream;
-      setStream(mediaStream);
       setSystemCheck(prev => ({ ...prev, camera: 'good' }));
 
       const video = videoRef.current;
