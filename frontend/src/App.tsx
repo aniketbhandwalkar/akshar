@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage';
 import ScreenerTestPage from './pages/ScreenerTestPage';
 import ReadingTestPage from './pages/ReadingTestPage';
 import TestResultPage from './pages/TestResultPage';
+import AboutPage from './pages/AboutPage';
+import HelpPage from './pages/HelpPage';
 import { LoadingSpinner, GlobalStyles } from './components/shared/EnhancedStyledComponents';
 
 // Protected Route Component
@@ -117,9 +119,9 @@ function App() {
               } 
             />
             
-            {/* Temporary placeholder routes - will implement later */}
-            <Route path="/about" element={<div>About page coming soon...</div>} />
-            <Route path="/help" element={<div>Help page coming soon...</div>} />
+            {/* About page */}
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/help" element={<HelpPage />} />
             <Route path="/search" element={<div>Search page coming soon...</div>} />
             
             {/* Catch all route */}

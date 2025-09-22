@@ -479,6 +479,22 @@ const ReadingTestPage: React.FC = () => {
       fixations: processFixations(gazeDataRef.current)
     };
 
+    // Debug: log gaze/fixation summary before submission
+    try {
+      const gazeCount = (gazeDataRef.current || []).length;
+      const fixationCount = (eyeTrackingData.fixations || []).length;
+      console.debug('Preparing to submit reading test', {
+        timeTaken,
+        gazeCount,
+        fixationCount,
+        sampleGazePoints: (gazeDataRef.current || []).slice(0, 5)
+      });
+    } catch (logErr) {
+      console.warn('Failed to log gaze data summary', logErr);
+    }
+
+    
+
     // Stop WebGazer
     if (window.webgazer) {
       try {
@@ -492,42 +508,14 @@ const ReadingTestPage: React.FC = () => {
     // Submit test results
     setSubmitting(true);
     try {
+      // submitReadingTest expects (eyeTrackingData, readingPassage, timeTaken)
       const testResult = await submitReadingTest(eyeTrackingData, passage, timeTaken);
       setResult(testResult);
       setShowResult(true);
     } catch (err: any) {
       console.error('Error submitting reading test:', err);
-      const averageReadingTime = passage.split(' ').length * 0.5; // 0.5 seconds per word
-      const readingSpeed = timeTaken > averageReadingTime ? 'slow' : 'normal';
-      const fixationCount = eyeTrackingData.fixations.length;
-      
-      // Simple analysis based on reading time and fixation patterns
-      const hasDyslexia = readingSpeed === 'slow' && fixationCount > 50;
-      
-      const mockResult = {
-        id: `reading-mock-${Date.now()}`,
-        testType: 'reading',
-        result: {
-          hasDyslexia: hasDyslexia,
-          confidence: Math.round(80 + Math.random() * 15), // Random confidence 80-95%
-          reasoning: hasDyslexia 
-            ? `Reading analysis shows slower than average reading speed (${timeTaken} seconds vs expected ${Math.round(averageReadingTime)} seconds) and increased fixation patterns (${fixationCount} fixations). These patterns may indicate reading difficulties that could be associated with dyslexia.`
-            : `Reading analysis shows normal reading speed (${timeTaken} seconds) and typical fixation patterns (${fixationCount} fixations). The eye-tracking data suggests efficient reading comprehension without significant indicators of dyslexia.`,
-          advice: hasDyslexia
-            ? "Consider consulting with a reading specialist for comprehensive evaluation. Eye-tracking patterns suggest potential reading difficulties that may benefit from specialized intervention."
-            : "Reading patterns appear within normal ranges. Continue to support reading development with regular practice and varied reading materials."
-        },
-        nearestDoctor: {
-          name: "Dr. Michael Chen",
-          address: "456 Reading Center, Learning District",
-          phone: "+1-555-0456"
-        },
-        createdAt: new Date().toISOString()
-      };
-      
-      setResult(mockResult);
-      setShowResult(true);
-      console.log('Using mock reading test result due to API error');
+      // surface a friendly error to the user
+      setError(err?.message || 'Failed to submit reading test. Please try again.');
     } finally {
       setSubmitting(false);
     }

@@ -46,7 +46,7 @@ const analyzeScreenerTest = (responses) => {
   };
 };
 
-const analyzeReadingTest = (eyeTrackingData, timeTaken, childAge) => {
+const analyzeReadingTest = (eyeTrackingData, timeTaken, childAge = 8) => {
   // Expected reading time ranges by age (in seconds)
   const expectedReadingTimes = {
     5: { min: 120, max: 180 },
@@ -58,61 +58,93 @@ const analyzeReadingTest = (eyeTrackingData, timeTaken, childAge) => {
     11: { min: 25, max: 50 },
     12: { min: 20, max: 45 }
   };
-  
+
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
   const ageRange = expectedReadingTimes[childAge] || expectedReadingTimes[8];
-  const isSlowReading = timeTaken > ageRange.max;
-  const isFastReading = timeTaken < ageRange.min;
-  
-  // Analyze eye tracking patterns (simplified analysis)
-  let erraticEyeMovement = false;
+
+  const gazePoints = Array.isArray(eyeTrackingData?.gazePoints) ? eyeTrackingData.gazePoints : [];
+  const totalPoints = gazePoints.length;
+
+  // Eye movement metrics
   let regressionCount = 0;
-  
-  if (eyeTrackingData && eyeTrackingData.gazePoints) {
-    // Count backward eye movements (regressions)
-    for (let i = 1; i < eyeTrackingData.gazePoints.length; i++) {
-      const current = eyeTrackingData.gazePoints[i];
-      const previous = eyeTrackingData.gazePoints[i - 1];
-      
-      // If current x position is significantly less than previous (regression)
-      if (current.x < previous.x - 50) {
-        regressionCount++;
-      }
-    }
-    
-    // More than 20% regressions indicate difficulty
-    erraticEyeMovement = regressionCount > (eyeTrackingData.gazePoints.length * 0.2);
+  let jumpDistances = [];
+  let longGaps = 0;
+
+  for (let i = 1; i < totalPoints; i++) {
+    const current = gazePoints[i];
+    const previous = gazePoints[i - 1];
+    const dx = current.x - previous.x;
+    const dy = current.y - previous.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    jumpDistances.push(dist);
+
+    // Backward movement across text lines (heuristic threshold)
+    if (dx < -35) regressionCount++;
+
+    const dt = current.timestamp - previous.timestamp;
+    if (dt > 500) longGaps++;
   }
-  
-  // Determine results
-  let hasDyslexia = false;
-  let confidence = 0;
-  let advice = "";
-  let reasoning = "";
-  
-  if (isSlowReading && erraticEyeMovement) {
-    hasDyslexia = true;
-    confidence = 85;
-    advice = "The reading test results suggest potential dyslexia indicators. We recommend a comprehensive evaluation by a qualified specialist for proper diagnosis and intervention planning.";
-    reasoning = `Your child took ${timeTaken} seconds to read the passage (expected range: ${ageRange.min}-${ageRange.max} seconds) and showed ${regressionCount} backward eye movements, indicating potential reading difficulties.`;
-  } else if (isSlowReading || erraticEyeMovement) {
-    hasDyslexia = true;
-    confidence = 60;
-    advice = "Some indicators suggest your child may benefit from additional reading support. Consider discussing these results with their teacher or a reading specialist.";
-    reasoning = isSlowReading 
-      ? `Your child took longer than expected to read the passage (${timeTaken} vs ${ageRange.max} seconds expected).`
-      : `Your child showed irregular eye movement patterns with ${regressionCount} regressions during reading.`;
+
+  const avgJump = jumpDistances.length ? (jumpDistances.reduce((s, d) => s + d, 0) / jumpDistances.length) : 0;
+  const largeJumps = jumpDistances.filter(d => d > 150).length;
+  const largeJumpRatio = totalPoints > 1 ? largeJumps / (totalPoints - 1) : 0;
+  const regressionRatio = totalPoints > 1 ? regressionCount / (totalPoints - 1) : 0;
+
+  // Tracking quality metrics
+  const dataRateHz = timeTaken > 0 ? totalPoints / timeTaken : 0; // points per second
+  const continuityPenalty = totalPoints > 1 ? (longGaps / (totalPoints - 1)) : 1; // proportion of long gaps
+
+  const stabilityScore = clamp(100 - (avgJump / 10), 0, 100); // higher is better
+  const rateScore = clamp((dataRateHz / 12) * 100, 0, 100); // 12Hz target
+  const continuityScore = clamp(100 - continuityPenalty * 100, 0, 100);
+  const trackingQuality = Math.round(0.5 * rateScore + 0.5 * continuityScore);
+
+  // Reading time signals
+  const isSlowReading = timeTaken > ageRange.max;
+  const isVerySlow = timeTaken > ageRange.max * 1.5;
+  const isFastReading = timeTaken < ageRange.min * 0.8; // possible skimming
+
+  // Indicator strength combines multiple signals
+  const timeOver = Math.max(0, timeTaken - ageRange.max);
+  const timeScore = clamp(timeOver / Math.max(1, ageRange.max), 0, 1); // 0..1
+  const regScore = clamp((regressionRatio - 0.1) / 0.4, 0, 1); // baseline 10%, saturate at 50%
+  const jumpScore = clamp((largeJumpRatio - 0.05) / 0.25, 0, 1); // baseline 5%, saturate at 30%
+
+  let indicatorStrength = 0.5 * timeScore + 0.3 * regScore + 0.2 * jumpScore;
+  if (isFastReading) indicatorStrength = Math.max(indicatorStrength, 0.2);
+
+  const hasDyslexia = indicatorStrength >= 0.55 || isVerySlow;
+
+  // Confidence reflects tracking quality and signal strength (not a medical certainty)
+  let confidence;
+  const qualityFactor = trackingQuality / 100; // 0..1
+  if (hasDyslexia) {
+    confidence = Math.round(clamp(50 + 40 * indicatorStrength * qualityFactor + 10 * (stabilityScore / 100), 40, 95));
   } else {
-    hasDyslexia = false;
-    confidence = 25;
-    advice = "The reading test results are within normal ranges. Continue encouraging regular reading practice to support your child's development.";
-    reasoning = `Your child completed the reading test in ${timeTaken} seconds (within expected range: ${ageRange.min}-${ageRange.max}) with normal eye movement patterns.`;
+    const negativeStrength = 1 - indicatorStrength;
+    confidence = Math.round(clamp(45 + 35 * negativeStrength * qualityFactor + 10 * (stabilityScore / 100), 35, 95));
   }
-  
+
+  // Compose reasoning
+  const reasoningParts = [];
+  reasoningParts.push(`Reading time: ${timeTaken}s (expected ${ageRange.min}-${ageRange.max}s for age ${childAge || 'N/A'})`);
+  reasoningParts.push(`Tracking quality: ${trackingQuality}% (rate ~${dataRateHz.toFixed(1)}Hz, regressions ${Math.round(regressionRatio * 100)}%)`);
+  if (hasDyslexia) {
+    reasoningParts.push(`Signals: ${isSlowReading ? 'slow reading' : ''}${isVerySlow ? ' (very slow)' : ''}${regressionRatio > 0.2 ? (isSlowReading ? ', ' : '') + 'frequent regressions' : ''}${largeJumpRatio > 0.15 ? ', large saccades' : ''}`);
+  } else {
+    reasoningParts.push('Eye movement patterns and timing fall within expected ranges.');
+  }
+
+  const advice = hasDyslexia
+    ? 'These screening signals suggest possible reading difficulties. Please consider a comprehensive evaluation by a qualified specialist.'
+    : "Current signals are within expected ranges. Continue regular reading practice and monitoring; seek evaluation if concerns persist.";
+
   return {
     hasDyslexia,
     confidence,
     advice,
-    reasoning
+    reasoning: reasoningParts.join(' | ')
   };
 };
 

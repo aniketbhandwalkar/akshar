@@ -87,6 +87,17 @@ export const getTestResult = async (id: string): Promise<TestResult> => {
   }
 };
 
+// Get configured clinician
+export const getClinician = async (): Promise<{ name: string; specialization?: string; address: string; phone: string; email?: string } | null> => {
+  try {
+    const response = await api.get('/tests/clinician');
+    return response.data.clinician || null;
+  } catch (error: any) {
+    // If not configured, return null instead of throwing to allow graceful fallback
+    return null;
+  }
+};
+
 // Download PDF
 export const downloadTestResultPDF = async (id: string): Promise<Blob> => {
   try {

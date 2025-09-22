@@ -394,6 +394,13 @@ const ScreenerTestPage: React.FC = () => {
                   'Next'
                 )}
               </Button>
+              <Button
+                variant="secondary"
+                onClick={()=>navigate('/dashboard')}
+                disabled={currentQuestion === 0}
+              >
+                Cancel Test
+              </Button>
             </NavigationButtons>
           </QuestionCard>
         </Container>

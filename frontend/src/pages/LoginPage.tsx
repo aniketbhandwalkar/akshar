@@ -19,7 +19,7 @@ import {
 
 const LoginContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(145deg, #f8fafc 0%, #e0e7ff 100%);
+  background: #c8d3dfff;
   padding: 40px 0;
   position: relative;
   
@@ -40,7 +40,7 @@ const LoginCard = styled(Card)`
   margin: 40px auto;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   position: relative;
   z-index: 2;
 `;

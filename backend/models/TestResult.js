@@ -36,8 +36,10 @@ const testResultSchema = new mongoose.Schema({
   },
   nearestDoctor: {
     name: String,
+    specialization: String,
     address: String,
-    phone: String
+    phone: String,
+    email: String
   },
   eyeTrackingData: {
     type: mongoose.Schema.Types.Mixed

@@ -25,8 +25,10 @@ export interface TestResult {
   };
   nearestDoctor?: {
     name: string;
+    specialization?: string;
     address: string;
     phone: string;
+    email?: string;
   };
   createdAt: string;
   updatedAt?: string;

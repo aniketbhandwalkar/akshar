@@ -1,44 +1,32 @@
 import jsPDF from 'jspdf';
 import { TestResult, User } from '../types';
+import { getClinician } from './testService';
 
-// Generate QR code data URL (placeholder - in production use proper QR library)
-// const generateQRCode = (text: string): string => {
-//   return `data:image/svg+xml;base64,${btoa(`
-//     <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-//       <rect width="80" height="80" fill="#000"/>
-//       <rect x="5" y="5" width="70" height="70" fill="#fff"/>
-//       <text x="40" y="45" text-anchor="middle" fill="#000" font-size="6">QR CODE</text>
-//     </svg>
-//   `)}`;
-// };
-
-// Mock function to get clinician data (replace with actual Gemini API call)
-const getCliniciansNearUser = async (userArea: string) => {
-  // This would normally call your backend which uses Gemini API
-  return [
-    {
-      name: "Dr. Sarah Wilson",
-      specialization: "Pediatric Learning Disorders",
-      address: `123 Medical Center, ${userArea}`,
-      phone: "+1 (555) 123-4567",
-      email: "s.wilson@medicalcenter.com",
-      distance: "2.3 km"
-    },
-    {
-      name: "Dr. Michael Chen",
-      specialization: "Educational Psychology",
-      address: `456 Learning Institute, ${userArea}`,
-      phone: "+1 (555) 234-5678",
-      email: "m.chen@learninginst.com",
-      distance: "4.1 km"
-    }
-  ];
+// Local type for clinician/doctor details used in the PDF
+type ClinicianInfo = {
+  name: string;
+  specialization?: string;
+  address: string;
+  phone: string;
+  email?: string;
 };
 
 const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
   try {
     // Create new PDF document
     const doc = new jsPDF();
+    
+    // Helpers for pagination
+    const getPageHeight = () => (doc.internal.pageSize.getHeight ? doc.internal.pageSize.getHeight() : (doc.internal.pageSize as any).height);
+    const bottomMargin = 20;
+    let yPosition = 65;
+    const ensureSpace = (needed: number = 20) => {
+      const pageHeight = getPageHeight();
+      if (yPosition + needed > pageHeight - bottomMargin) {
+        doc.addPage();
+        yPosition = 30;
+      }
+    };
     
     // Set font
     doc.setFont('Baskerville');
@@ -85,7 +73,6 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
       year: 'numeric', month: 'long', day: 'numeric'
     })}`, 130, 30);
     
-    let yPosition = 65;
     
     // PATIENT INFORMATION SECTION
     doc.setFontSize(16);
@@ -95,6 +82,7 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     yPosition += 15;
     
     // Patient info box
+    ensureSpace(45);
     doc.setDrawColor(229, 231, 235);
     doc.setFillColor(249, 250, 251);
     doc.rect(20, yPosition, 170, 35, 'FD');
@@ -117,6 +105,7 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     yPosition += 15;
     
     // Result summary box
+    ensureSpace(45);
     const resultBgColor = testResult.result.hasDyslexia ? [254, 243, 199] : [209, 250, 229];
     const resultBorderColor = testResult.result.hasDyslexia ? [245, 158, 11] : [16, 185, 129];
     
@@ -156,6 +145,7 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(55, 65, 81);
     const analysisLines = doc.splitTextToSize(testResult.result.reasoning, 170);
+    ensureSpace(analysisLines.length * 6 + 20);
     doc.text(analysisLines, 20, yPosition);
     yPosition += analysisLines.length * 6 + 15;
     
@@ -174,6 +164,7 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
         blinkRate: Math.floor(Math.random() * 5) + 15 // 15-20 per minute
       };
       
+      ensureSpace(35);
       doc.setFillColor(248, 250, 252);
       doc.rect(20, yPosition, 170, 25, 'F');
       doc.setDrawColor(229, 231, 235);
@@ -200,101 +191,74 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(55, 65, 81);
     const adviceLines = doc.splitTextToSize(testResult.result.advice, 170);
+    ensureSpace(adviceLines.length * 6 + 20);
     doc.text(adviceLines, 20, yPosition);
     yPosition += adviceLines.length * 6 + 20;
     
-    // Check if new page needed
-    if (yPosition > 230) {
-      doc.addPage();
-      yPosition = 30;
-    }
+    // Ensure space before clinician section
+    ensureSpace(40);
     
-    // CLINICIAN RECOMMENDATIONS
+// CLINICIAN RECOMMENDATION
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(52, 73, 81);
-    doc.text('RECOMMENDED SPECIALISTS', 20, yPosition);
+    doc.text('RECOMMENDED SPECIALIST', 20, yPosition);
     yPosition += 12;
-    
+
     try {
-      const clinicians = await getCliniciansNearUser(user.area);
-      
-      clinicians.forEach((clinician, index) => {
-        if (index < 2) { // Show top 2 clinicians
-          doc.setDrawColor(59, 130, 246);
-          doc.setFillColor(239, 246, 255);
-          doc.rect(20, yPosition, 170, 30, 'FD');
-          
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(30, 64, 175);
-          doc.text(`Dr. ${clinician.name}`, 25, yPosition + 8);
-          
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(55, 65, 81);
-          doc.text(clinician.specialization, 25, yPosition + 15);
-          doc.text(`📍 ${clinician.address}`, 25, yPosition + 22);
-          doc.text(`📞 ${clinician.phone} | ✉️ ${clinician.email}`, 25, yPosition + 28);
-          
-          yPosition += 40;
-        }
-      });
-    } catch (error) {
-      // Fallback to original doctor data
-      if (testResult.nearestDoctor) {
+      const clinician = await getClinician();
+      const docCard = (doctor: ClinicianInfo) => {
+        ensureSpace(40);
         doc.setDrawColor(59, 130, 246);
         doc.setFillColor(239, 246, 255);
-        doc.rect(20, yPosition, 170, 25, 'FD');
-        
+        doc.rect(20, yPosition, 170, 30, 'FD');
+
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(30, 64, 175);
-        doc.text(`Dr. ${testResult.nearestDoctor.name}`, 25, yPosition + 8);
-        
+        doc.text(`${doctor.name.startsWith('Dr.') ? doctor.name : 'Dr. ' + doctor.name}`, 25, yPosition + 8);
+
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(55, 65, 81);
-        doc.text(`📍 ${testResult.nearestDoctor.address}`, 25, yPosition + 15);
-        doc.text(`📞 ${testResult.nearestDoctor.phone}`, 25, yPosition + 22);
-        
-        yPosition += 35;
+        if (doctor.specialization) doc.text(doctor.specialization, 25, yPosition + 15);
+        if (doctor.address) doc.text(`📍 ${doctor.address}`, 25, yPosition + 22);
+        const contact = `${doctor.phone ? `📞 ${doctor.phone}` : ''}${doctor.email ? (doctor.phone ? ' | ' : '') + `✉️ ${doctor.email}` : ''}`;
+        if (contact) doc.text(contact, 25, yPosition + 28);
+
+        yPosition += 40;
+      };
+
+      if (clinician) {
+        docCard(clinician);
+      } else if (testResult.nearestDoctor) {
+        docCard(testResult.nearestDoctor);
+      }
+    } catch (error) {
+      if (testResult.nearestDoctor) {
+        const d = testResult.nearestDoctor;
+        doc.setDrawColor(59, 130, 246);
+        doc.setFillColor(239, 246, 255);
+        doc.rect(20, yPosition, 170, 30, 'FD');
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 64, 175);
+        doc.text(`${d.name.startsWith('Dr.') ? d.name : 'Dr. ' + d.name}`, 25, yPosition + 8);
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(55, 65, 81);
+        if (d.specialization) doc.text(d.specialization, 25, yPosition + 15);
+        if (d.address) doc.text(`📍 ${d.address}`, 25, yPosition + 22);
+        const contact = `${d.phone ? `📞 ${d.phone}` : ''}${d.email ? (d.phone ? ' | ' : '') + `✉️ ${d.email}` : ''}`;
+        if (contact) doc.text(contact, 25, yPosition + 28);
+
+        yPosition += 40;
       }
     }
     
-    // QR CODE FOR SHARING
-    const shareUrl = `${window.location.origin}/test-result/${testId}`;
-    
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(52, 73, 81);
-    doc.text('SHARE WITH CLINICIANS', 20, yPosition);
-    yPosition += 15;
-    
-    // QR Code placeholder
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(255, 255, 255);
-    doc.rect(20, yPosition, 35, 35, 'FD');
-    
-    doc.setFontSize(8);
-    doc.setTextColor(107, 114, 128);
-    doc.text('QR CODE', 30, yPosition + 20);
-    
-    // Share info
-    doc.setFontSize(12);
-    doc.setTextColor(55, 65, 81);
-    doc.text('Scan QR code or visit:', 65, yPosition + 8);
-    
-    doc.setFontSize(9);
-    doc.setTextColor(59, 130, 246);
-    const urlLines = doc.splitTextToSize(shareUrl, 120);
-    doc.text(urlLines, 65, yPosition + 16);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(107, 114, 128);
-    doc.text('Share this report securely with healthcare professionals', 65, yPosition + 25);
-    
-    yPosition += 50;
+// Removed QR code section per requirements; proceed to disclaimers
     
     // IMPORTANT NOTES
     doc.setFontSize(14);
@@ -316,6 +280,7 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     doc.setTextColor(107, 114, 128);
     
     disclaimers.forEach(disclaimer => {
+      ensureSpace(10);
       doc.text(disclaimer, 20, yPosition);
       yPosition += 6;
     });
@@ -323,7 +288,13 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     yPosition += 15;
     
     // PROFESSIONAL FOOTER
-    const footerY = Math.max(yPosition, 270);
+    const pageHeightFinal = getPageHeight();
+    const footerHeight = 27;
+    if (yPosition > pageHeightFinal - footerHeight - 10) {
+      doc.addPage();
+      yPosition = 30;
+    }
+    const footerY = pageHeightFinal - footerHeight;
     doc.setFillColor(248, 250, 252);
     doc.rect(0, footerY, 210, 27, 'F');
     doc.setDrawColor(229, 231, 235);

@@ -12,6 +12,13 @@ const testRoutes = require('./routes/tests');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for rate limiting (needed for X-Forwarded-For header)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy in production
+} else {
+  app.set('trust proxy', true); // Trust all proxies in development
+}
+
 // Connect to MongoDB
 connectDB();
 

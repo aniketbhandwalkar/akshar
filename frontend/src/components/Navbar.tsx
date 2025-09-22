@@ -115,9 +115,7 @@ const Navbar: React.FC<NavbarProps> = ({ showAuthButtons = false }) => {
                 <NavLink to="/about" $active={isActive('/about')}>
                   About Us
                 </NavLink>
-                <NavLink to="/search" $active={isActive('/search')}>
-                  Search
-                </NavLink>
+                
                 <NavLink to="/help" $active={isActive('/help')}>
                   Help
                 </NavLink>

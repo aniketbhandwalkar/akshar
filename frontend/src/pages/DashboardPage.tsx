@@ -18,7 +18,7 @@ import {
   Badge,
   FlexContainer,
   GlobalStyles,
-  IconWrapper
+  
 } from '../components/shared/EnhancedStyledComponents';
 
 const DashboardContainer = styled.div`
@@ -287,7 +287,7 @@ const DashboardPage: React.FC = () => {
                   variant={canTakeReadingTest ? "gradient" : "secondary"}
                   size="large"
                   disabled={!canTakeReadingTest}
-                  style={{ width: '100%' }}
+                  style={{ width: '100%', marginTop:'27px'}}
                 >
                   {canTakeReadingTest ? ' Start Reading Test' : ' Age Restricted'}
                 </Button>

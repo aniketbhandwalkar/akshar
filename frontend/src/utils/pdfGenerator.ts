@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { TestResult, User } from '../types';
+import { getClinician } from './testService';
 
 // Helper to fetch image as base64
 const getBase64ImageFromUrl = async (url: string): Promise<string> => {
@@ -16,6 +17,18 @@ const getBase64ImageFromUrl = async (url: string): Promise<string> => {
 const generatePDF = async (testResult: TestResult, user: User) => {
   try {
     const doc = new jsPDF();
+
+    // Pagination helpers
+    const getPageHeight = () => (doc.internal.pageSize.getHeight ? doc.internal.pageSize.getHeight() : (doc.internal.pageSize as any).height);
+    const bottomMargin = 20;
+    let yPosition = 60; // moved into helper control
+    const ensureSpace = (needed: number = 20) => {
+      const pageHeight = getPageHeight();
+      if (yPosition + needed > pageHeight - bottomMargin) {
+        doc.addPage();
+        yPosition = 30;
+      }
+    };
 
     // Header background
     doc.setFillColor(52, 73, 81); // dark gray
@@ -49,13 +62,14 @@ const generatePDF = async (testResult: TestResult, user: User) => {
     );
     doc.text(`Test Date: ${new Date(testResult.createdAt).toLocaleDateString()}`, 150, 55);
 
-    let yPosition = 60;
-
+    
     // Patient Info
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.text('PATIENT INFORMATION', 20, yPosition);
     yPosition += 10;
+
+    ensureSpace(30);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -74,7 +88,9 @@ const generatePDF = async (testResult: TestResult, user: User) => {
     doc.text('TEST RESULTS', 20, yPosition);
     yPosition += 10;
 
-    const resultColor = testResult.result.hasDyslexia ? [254, 243, 199] : [209, 250, 229]; // Yellow or green
+    ensureSpace(40);
+
+    const resultColor = testResult.result.hasDyslexia ? [254, 243, 199] : [209, 250, 229];
     doc.setFillColor(resultColor[0], resultColor[1], resultColor[2]);
     doc.rect(20, yPosition, 170, 30, 'F');
     doc.rect(20, yPosition, 170, 30, 'S'); // Border
@@ -103,6 +119,7 @@ const generatePDF = async (testResult: TestResult, user: User) => {
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     const reasoningLines = doc.splitTextToSize(testResult.result.reasoning, 170);
+    ensureSpace(reasoningLines.length * 6 + 20);
     doc.text(reasoningLines, 20, yPosition);
     yPosition += reasoningLines.length * 6 + 10;
 
@@ -115,28 +132,39 @@ const generatePDF = async (testResult: TestResult, user: User) => {
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     const adviceLines = doc.splitTextToSize(testResult.result.advice, 170);
+    ensureSpace(adviceLines.length * 6 + 20);
     doc.text(adviceLines, 20, yPosition);
     yPosition += adviceLines.length * 6 + 15;
 
-    // Specialist
-    if (testResult.nearestDoctor) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('RECOMMENDED SPECIALIST', 20, yPosition);
-      yPosition += 10;
+// Specialist
+try {
+  let specialist = testResult.nearestDoctor || await getClinician();
+  if (specialist) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RECOMMENDED SPECIALIST', 20, yPosition);
+    yPosition += 10;
 
-      doc.setFillColor(248, 250, 252);
-      doc.rect(20, yPosition, 170, 25, 'F');
-      doc.rect(20, yPosition, 170, 25, 'S');
+    ensureSpace(40);
 
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Dr. ${testResult.nearestDoctor.name}`, 25, yPosition + 8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Address: ${testResult.nearestDoctor.address}`, 25, yPosition + 15);
-      doc.text(`Phone: ${testResult.nearestDoctor.phone}`, 25, yPosition + 22);
-      yPosition += 40;
-    }
+    doc.setFillColor(248, 250, 252);
+    doc.rect(20, yPosition, 170, 30, 'F');
+    doc.rect(20, yPosition, 170, 30, 'S');
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    const nameText = specialist.name.startsWith('Dr.') ? specialist.name : `Dr. ${specialist.name}`;
+    doc.text(nameText, 25, yPosition + 8);
+    doc.setFont('helvetica', 'normal');
+    if (specialist.specialization) doc.text(`${specialist.specialization}`, 25, yPosition + 15);
+    doc.text(`Address: ${specialist.address}`, 25, yPosition + 22);
+    const contact = `${specialist.phone ? `Phone: ${specialist.phone}` : ''}${specialist.email ? (specialist.phone ? ' | ' : '') + `Email: ${specialist.email}` : ''}`;
+    if (contact) doc.text(contact, 25, yPosition + 29);
+    yPosition += 45;
+  }
+} catch (e) {
+  // ignore if clinician endpoint unavailable
+}
 
     // Notes
     doc.setFontSize(14);
@@ -158,16 +186,23 @@ const generatePDF = async (testResult: TestResult, user: User) => {
     });
     yPosition += 15;
 
-    // Footer
+    // Footer at bottom of page
+    const pageHeightFinal = getPageHeight();
+    const footerHeight = 25;
+    if (yPosition > pageHeightFinal - footerHeight - 10) {
+      doc.addPage();
+      yPosition = 30;
+    }
+    const footerY = pageHeightFinal - footerHeight;
     doc.setFillColor(248, 250, 252);
-    doc.rect(0, yPosition, 210, 25, 'F');
+    doc.rect(0, footerY, 210, footerHeight, 'F');
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
-    doc.text('This report was generated by AKSHAR - AI-based Dyslexia Detection System', 20, yPosition + 8);
+    doc.text('This report was generated by AKSHAR - AI-based Dyslexia Detection System', 20, footerY + 8);
     const testId = testResult.id || testResult._id || 'UNKNOWN';
-    doc.text(`Report ID: ${testId}`, 20, yPosition + 15);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, yPosition + 22);
-    doc.text('© 2024 AKSHAR. All rights reserved.', 150, yPosition + 15);
+    doc.text(`Report ID: ${testId}`, 20, footerY + 15);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, footerY + 22);
+    doc.text('© 2024 AKSHAR. All rights reserved.', 150, footerY + 15);
 
     // Save PDF
     const filename = `AKSHAR_Report_${user.parentName.replace(/\s+/g, '_')}_${new Date()

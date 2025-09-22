@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Navbar from '../components/Navbar';
@@ -14,10 +14,13 @@ import {
   GlobalStyles
 } from '../components/shared/EnhancedStyledComponents';
 
+
+
 const HeroSection = styled.div`
-  background-image: url('/images/parent_mode.png');
-  background-size: cover;
-  background-position: center;
+  /* Darkened layered background using parent_mode with a stronger overlay */
+  background-image: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 60%), url('/images/parent_mode.png');
+  background-size: cover;          /* fill full width/height; may crop */
+  background-position: center 30%; /* bias framing slightly toward the top */
   background-repeat: no-repeat;
   color: white;
   padding: 120px 0;
@@ -26,18 +29,9 @@ const HeroSection = styled.div`
   min-height: 100vh;
   display: flex;
   align-items: center;
+
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(37, 33, 33, 0.3);
-    z-index: 1;
-  }
-  
+
   & > * {
     position: relative;
     z-index: 2;
@@ -65,13 +59,14 @@ const HeroSubtitle = styled(Subtitle)`
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   
   
+  
   @media (max-width: 768px) {
     font-size: 1.3rem;
   }
 `;
 
 const HeroDescription = styled(Text)`
-  color: rgba(255, 255, 255, 0.9);
+  color: white;
   font-size: 1.6rem;
   font-family:'Baskerville', serif;
   margin-bottom: 40px;
@@ -92,6 +87,57 @@ const FeatureCard = styled(Card)`
   height: 100%;
   background: #d1e2f3ff;
   border: 1px solid #e5e7eb;
+
+  .hover-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    img, video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      will-change: transform;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .overlay-permanent {
+      opacity: 1 !important;
+      background-color: rgba(0,0,0,0.45); /* make slightly lighter so video remains visible */
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      will-change: transform;
+      display: block;
+    }
+
+    &:hover {
+      img, video { transform: scale(1.06); }
+    }
+  }
 `;
 
 
@@ -139,8 +185,7 @@ const LandingPage: React.FC = () => {
           <HeroTitle>AKSHAR</HeroTitle>
           <HeroSubtitle>AI-based Real-time Dyslexia Detection System</HeroSubtitle>
           <HeroDescription text-color="black">
-            Early detection and intervention for dyslexia using advanced AI technology
-            and eye-tracking analysis to help children overcome reading challenges and unlock their full potential.
+            Is your child struggling to read? AKSHAR uses AI-powered eye-tracking to detect dyslexia early and guide them toward success.
           </HeroDescription>
 
           <ButtonGroup>
@@ -150,7 +195,7 @@ const LandingPage: React.FC = () => {
               variant="primary"
               size="large"
             >
-              Get Started Free
+              Start Your Assessment
             </Button>
             <Button
               as={Link}
@@ -158,7 +203,7 @@ const LandingPage: React.FC = () => {
               variant="secondary"
               size="large"
             >
-              Learn More
+              Explore the Features
             </Button>
           </ButtonGroup>
 
@@ -171,75 +216,81 @@ const LandingPage: React.FC = () => {
         <Container>
           <SectionTitle> How AKSHAR Works</SectionTitle>
           <Grid columns={3} gap={32}>
-            <FeatureCard>
-              <img
-                src="/images/quiz_bg.png"
-                alt="Smart Screening"
-                style={{ width: '110px', height: '110px', marginBottom: '24px' }}
-              />
-              <Subtitle>Smart Screening</Subtitle>
-              <Text>
-                Complete a comprehensive 10-question screening assessment
-                designed by experts to identify potential signs of dyslexia.
-              </Text>
-              <span style={{
-                display: 'inline-block',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                backgroundColor: '#f7faf7ff',
-                color: '#1e40af'
-              }}>Expert Designed</span>
+
+            <FeatureCard style={{ position: 'relative', height: '420px' }}>
+              <div className="hover-wrapper">
+                <video
+                  poster="/images/eye_bg.png"
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  preload="metadata"
+                  style={{ display: 'block' }}
+                >
+                  <source src="/images/sc_test.mp4" type="video/mp4" />
+                </video>
+
+                <div className="overlay overlay-permanent">
+                  <Subtitle style={{ color: '#fff' }}>Smart Screening</Subtitle>
+                  <Text style={{ color: '#fff' }}>
+                    Complete a comprehensive 10-question screening assessment
+                    designed by experts to identify potential signs of dyslexia.
+                  </Text>
+                </div>
+              </div>
             </FeatureCard>
 
 
-            <FeatureCard>
-              <img
-                src="/images/eye_bg.png"
-                alt="eye Tracking Analysis"
-                style={{ width: '110px', height: '110px', marginBottom: '24px' }}
-              />
-              <Subtitle>Eye Tracking Analysis</Subtitle>
-              <Text>
-                Revolutionary eye-tracking technology monitors reading patterns
-                and identifies difficulties in real-time with precision.
-              </Text>
-              <span style={{
-                display: 'inline-block',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                backgroundColor: '#d1fae5',
-                color: '#065f46'
-              }}>Real-time</span>
+            <FeatureCard style={{ position: 'relative', height: '420px' }}>
+              <div className="hover-wrapper">
+                <video
+                  poster="/images/eye_bg.png"
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  preload="metadata"
+                  style={{ display: 'block' }}
+                >
+                  <source src="/images/eye_scanner.mp4" type="video/mp4" />
+                </video>
+
+                <div className="overlay overlay-permanent">
+                  <Subtitle style={{ color: '#fff' }}>Eye Tracking Analysis</Subtitle>
+                  <Text style={{ color: '#fff' }}>
+                    Revolutionary eye-tracking technology monitors reading patterns and
+                    identifies difficulties in real-time with precision.
+                  </Text>
+                </div>
+              </div>
             </FeatureCard>
 
-            <FeatureCard>
-              <img
-                src="/images/ai_bg.png"
-                alt="AI-Powered Insights"
-                style={{ width: '110px', height: '110px', marginBottom: '24px' }}
-              />
-              <Subtitle>AI-Powered Insights</Subtitle>
-              <Text>
-                Get detailed reports with professional recommendations
-                and personalized guidance for your child's learning journey.
-              </Text>
-              <span style={{
-                display: 'inline-block',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                backgroundColor: '#fef3c7',
-                color: '#92400e'
-              }}>AI-Powered</span>
+            <FeatureCard style={{ position: 'relative', height: '420px' }}>
+              <div className="hover-wrapper">
+                <video
+                  poster="/images/eye_bg.png"
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  preload="metadata"
+                  style={{ display: 'block' }}
+                >
+                  <source src="/images/ai_video.mp4" type="video/mp4" />
+                </video>
+
+                <div className="overlay overlay-permanent">
+                  <Subtitle style={{ color: '#fff' }}>AI-Powered Insights</Subtitle>
+                  <Text style={{ color: '#fff' }}>
+                    Get detailed reports with professional recommendations
+                    and personalized guidance for your child's learning journey.
+
+                  </Text>
+                </div>
+              </div>
             </FeatureCard>
+
           </Grid>
         </Container>
       </Section>
@@ -248,8 +299,8 @@ const LandingPage: React.FC = () => {
         <Container>
           <Title> Ready to Help Your Child?</Title>
           <Text style={{ fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto 40px' }}>
-            Join thousands of parents who have already discovered AKSHAR's
-            innovative approach to dyslexia detection and intervention.
+            Join AKSHAR family today and take the first step towards empowering your child
+            with the right tools and support for a successful learning journey.
           </Text>
 
 
@@ -301,15 +352,7 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <Subtitle style={{ color: 'white', fontSize: '1.2rem' }}>Follow Us</Subtitle>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <span style={{ color: '#9ca3af' }}>Facebook</span>
-                <span style={{ color: '#9ca3af' }}>Twitter</span>
-                <span style={{ color: '#9ca3af' }}>LinkedIn</span>
-              </div>
-            </div>
-          </Grid>
+           </Grid>
 
           <div style={{
             borderTop: '1px solid #374151',

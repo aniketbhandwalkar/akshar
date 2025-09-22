@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const { generatePDF } = require('../utils/pdfGenerator');
 const { analyzeScreenerTest, analyzeReadingTest, SCREENER_QUESTIONS } = require('../utils/testAnalyzer');
 const { generateReadingPassage } = require('../utils/geminiApi');
+const { getClinician } = require('../utils/clinician');
 
 const router = express.Router();
 
@@ -31,6 +32,9 @@ router.post('/screener', auth, async (req, res) => {
     }
 
     const analysis = analyzeScreenerTest(responses);
+
+    // Attach configured clinician (if available)
+    const clinician = getClinician();
     
     const testResult = new TestResult({
       userId: req.user._id,
@@ -41,7 +45,14 @@ router.post('/screener', auth, async (req, res) => {
         confidence: analysis.confidence,
         advice: analysis.advice,
         reasoning: analysis.reasoning
-      }
+      },
+      nearestDoctor: clinician ? {
+        name: clinician.name,
+        specialization: clinician.specialization,
+        address: clinician.address,
+        phone: clinician.phone,
+        email: clinician.email
+      } : undefined
     });
 
     await testResult.save();
@@ -78,7 +89,10 @@ router.post('/reading', auth, async (req, res) => {
       return res.status(400).json({ message: 'Missing required data' });
     }
 
-    const analysis = analyzeReadingTest(eyeTrackingData, timeTaken);
+    const analysis = analyzeReadingTest(eyeTrackingData, timeTaken, req.user?.childAge);
+
+    // Attach configured clinician (if available)
+    const clinician = getClinician();
     
     const testResult = new TestResult({
       userId: req.user._id,
@@ -91,7 +105,14 @@ router.post('/reading', auth, async (req, res) => {
         confidence: analysis.confidence,
         advice: analysis.advice,
         reasoning: analysis.reasoning
-      }
+      },
+      nearestDoctor: clinician ? {
+        name: clinician.name,
+        specialization: clinician.specialization,
+        address: clinician.address,
+        phone: clinician.phone,
+        email: clinician.email
+      } : undefined
     });
 
     await testResult.save();
@@ -114,6 +135,22 @@ router.get('/results', auth, async (req, res) => {
     res.json({ success: true, testResults });
   } catch (error) {
     console.error('Get test results error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route GET /api/tests/clinician
+// @desc Get configured clinician details
+// @access Private
+router.get('/clinician', auth, (req, res) => {
+  try {
+    const clinician = getClinician();
+    if (!clinician) {
+      return res.status(404).json({ message: 'Clinician not configured' });
+    }
+    res.json({ success: true, clinician });
+  } catch (error) {
+    console.error('Get clinician error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
