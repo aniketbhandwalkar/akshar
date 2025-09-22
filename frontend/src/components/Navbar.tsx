@@ -35,7 +35,7 @@ const LogoLink = styled(Link)`
 `;
 
 const LogoImage = styled.img`
-  height: 32px;  /* shorter logo */
+  height: 60px;  /* shorter logo */
   width: auto;
 `;
 
@@ -73,6 +73,8 @@ const NavLink = styled(Link)<{ $active?: boolean }>`
 
 const NavButton = styled(Button)`
   margin-left: 6px;
+  background: #4f46e5;
+  color: white;
   padding: 6px 12px; /* smaller button size */
   font-size: 0.85rem;
   border-radius: 6px;

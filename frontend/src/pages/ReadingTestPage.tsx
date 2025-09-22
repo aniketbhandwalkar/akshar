@@ -847,14 +847,14 @@ const ReadingTestPage: React.FC = () => {
         <Container>
           {!testStarted ? (
             <Card style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <Title>🔬 Advanced Eye Tracking Reading Test</Title>
+              <Title> Advanced Eye Tracking Reading Test</Title>
               <Text style={{ marginBottom: '30px' }}>
                 This test uses advanced eye-tracking technology to analyze your child's reading patterns and eye movements.
                 <strong> Camera access is required</strong> for accurate analysis.
               </Text>
               
               <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '1px solid #0ea5e9' }}>
-                <Subtitle style={{ marginBottom: '15px', color: '#0369a1' }}>📋 Important Instructions:</Subtitle>
+                <Subtitle style={{ marginBottom: '15px', color: '#0369a1' }}> Important Instructions:</Subtitle>
                 <div style={{ textAlign: 'left' }}>
                   <Text><strong>1. Camera Setup:</strong> Allow camera access when prompted</Text>
                   <Text><strong>2. Calibration:</strong> Look directly at each calibration point for 2-3 seconds</Text>
@@ -866,7 +866,7 @@ const ReadingTestPage: React.FC = () => {
               
               <div style={{ marginBottom: '20px', padding: '20px', backgroundColor: '#fef3c7', borderRadius: '8px', border: '1px solid #f59e0b' }}>
                 <Text style={{ fontSize: '16px', margin: '0 0 10px 0', fontWeight: '600', color: '#92400e' }}>
-                  📸 Camera Permission Required
+                   Camera Permission Required
                 </Text>
                 <Text style={{ fontSize: '14px', margin: 0, color: '#78350f' }}>
                   When you click "Start Eye Tracking Test", your browser will show a permission dialog asking:
@@ -895,7 +895,7 @@ const ReadingTestPage: React.FC = () => {
                   onClick={() => setShowReadinessModal(true)}
                   style={{ padding: '15px 25px' }}
                 >
-                  🎯 Start Eye Tracking Test
+                   Start Eye Tracking Test
                 </Button>
               </FlexContainer>
             </Card>

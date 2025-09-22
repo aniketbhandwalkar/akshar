@@ -115,7 +115,7 @@ const ActionButtons = styled.div`
   gap: 10px;
 `;
 
-// Helper function to safely get the result ID
+
 const getResultId = (result: TestResult): string => {
   return result.id || result._id || '';
 };
@@ -172,19 +172,19 @@ const DashboardPage: React.FC = () => {
     new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   const canTakeReadingTest = user && user.childAge >= 5 && user.childAge <= 12;
-  
+
   // Mini Analytics
   const getAnalytics = () => {
     if (testResults.length === 0) return null;
-    
+
     const avgConfidence = Math.round(
       testResults.reduce((sum, result) => sum + (result.result.confidence || 0), 0) / testResults.length
     );
     const indicatorsCount = testResults.filter(r => r.result.hasDyslexia).length;
     const recentTests = testResults.slice(0, 5);
-    const improvementTrend = recentTests.length >= 2 ? 
+    const improvementTrend = recentTests.length >= 2 ?
       Math.round(Math.random() * 30 + 5) : 0; // Mock calculation
-    
+
     return {
       totalTests: testResults.length,
       avgConfidence,
@@ -193,7 +193,7 @@ const DashboardPage: React.FC = () => {
       recentTests
     };
   };
-  
+
   const analytics = getAnalytics();
 
   return (
@@ -212,37 +212,36 @@ const DashboardPage: React.FC = () => {
                   Child Age: {user?.childAge} years • 📍 Location: {user?.area}
                 </Text>
               </div>
-              <IconWrapper size="large">👋</IconWrapper>
             </FlexContainer>
           </WelcomeCard>
 
           {/* Mini Analytics */}
           {analytics && (
             <div style={{ marginBottom: '40px', position: 'relative', zIndex: 2 }}>
-              <Subtitle style={{ marginBottom: '20px' }}>📊 Quick Insights</Subtitle>
+              <Subtitle style={{ marginBottom: '20px', fontFamily: '"Baskerville", serif' }}> Quick Insights</Subtitle>
               <Grid columns={4} gap={20} style={{ marginBottom: '30px' }}>
-                <Card style={{ textAlign: 'center', padding: '20px' }}>
+                <Card style={{ textAlign: 'center', padding: '20px', border: '1px solid black',backgroundColor: '#dde5ebff' }}>
                   <div style={{ fontSize: '2rem', fontWeight: '800', color: '#374151', marginBottom: '5px' }}>
                     {analytics.totalTests}
                   </div>
                   <Text style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>Total Tests</Text>
                 </Card>
-                
-                <Card style={{ textAlign: 'center', padding: '20px' }}>
+
+                <Card style={{ textAlign: 'center', padding: '20px', border: '1px solid black', backgroundColor: '#dde5ebff' }}>
                   <div style={{ fontSize: '2rem', fontWeight: '800', color: '#3b82f6', marginBottom: '5px' }}>
                     {analytics.avgConfidence}%
                   </div>
                   <Text style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>Avg Confidence</Text>
                 </Card>
-                
-                <Card style={{ textAlign: 'center', padding: '20px' }}>
+
+                <Card style={{ textAlign: 'center', padding: '20px', border: '1px solid black' ,backgroundColor: '#dde5ebff'}}>
                   <div style={{ fontSize: '2rem', fontWeight: '800', color: analytics.indicatorsCount > 0 ? '#f59e0b' : '#10b981', marginBottom: '5px' }}>
                     {analytics.indicatorsCount}
                   </div>
                   <Text style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>Indicators Found</Text>
                 </Card>
-                
-                <Card style={{ textAlign: 'center', padding: '20px' }}>
+
+                <Card style={{ textAlign: 'center', padding: '20px', border: '1px solid black', backgroundColor: '#dde5ebff' }}>
                   <div style={{ fontSize: '2rem', fontWeight: '800', color: '#10b981', marginBottom: '5px' }}>
                     +{analytics.improvementTrend}%
                   </div>
@@ -253,53 +252,52 @@ const DashboardPage: React.FC = () => {
           )}
 
           <div style={{ marginBottom: '40px', position: 'relative', zIndex: 2 }}>
-            <Subtitle style={{ marginBottom: '30px' }}>✨ Choose Your Test</Subtitle>
+            <Subtitle style={{ marginBottom: '30px', fontFamily: '"Baskerville", serif' }}> Choose Your Test</Subtitle>
             <Grid columns={2} gap={32}>
               <TestCard hover>
-                <IconWrapper size="large">🧠</IconWrapper>
                 <Subtitle>Smart Screener</Subtitle>
-                <Text style={{ marginBottom: '20px' }}>
-                  Complete a comprehensive 10-question assessment designed by experts 
+                <Text style={{ marginBottom: '20px', fontFamily: '"Baskerville", serif' }}>
+                  Complete a comprehensive 10-question assessment designed by experts
                   to identify potential signs of dyslexia.
                 </Text>
                 <Badge color="info" style={{ marginBottom: '20px' }}>All Ages</Badge>
-                <Button 
-                  as={Link} 
-                  to="/screener-test" 
+                <Button
+                  as={Link}
+                  to="/screener-test"
                   variant="primary"
                   size="large"
                   style={{ width: '100%' }}
                 >
-                  🚀 Start Screening
+                  Start Screening
                 </Button>
               </TestCard>
 
               <TestCard hover>
-                <IconWrapper size="large">👁️</IconWrapper>
                 <Subtitle>Eye Tracking Test</Subtitle>
-                <Text style={{ marginBottom: '20px' }}>
-                  Revolutionary eye-tracking analysis during reading tasks using advanced AI technology. 🤖
+                <Text style={{ marginBottom: '20px' , fontFamily: '"Baskerville", serif' }}>
+                  Revolutionary eye-tracking analysis during reading tasks 
+                  using advanced AI technology. 
                 </Text>
                 <Badge color={canTakeReadingTest ? "success" : "warning"} style={{ marginBottom: '20px' }}>
                   {canTakeReadingTest ? "Available" : "Ages 5-12"}
                 </Badge>
-                <Button 
-                  as={Link} 
-                  to="/reading-test" 
+                <Button
+                  as={Link}
+                  to="/reading-test"
                   variant={canTakeReadingTest ? "gradient" : "secondary"}
                   size="large"
                   disabled={!canTakeReadingTest}
                   style={{ width: '100%' }}
                 >
-                  {canTakeReadingTest ? '🔮 Start Reading Test' : '🔒 Age Restricted'}
+                  {canTakeReadingTest ? ' Start Reading Test' : ' Age Restricted'}
                 </Button>
               </TestCard>
             </Grid>
           </div>
 
           <div>
-            <Subtitle style={{ marginBottom: '30px' }}>Previous Test Results</Subtitle>
-            
+            <Subtitle style={{ marginBottom: '30px', fontFamily: '"Baskerville", serif'}}>Previous Test Results</Subtitle>
+
             {loading ? (
               <Card style={{ textAlign: 'center' }}>
                 <LoadingSpinner />
@@ -328,49 +326,49 @@ const DashboardPage: React.FC = () => {
                 {testResults.map((result: TestResult) => {
                   const resultId = getResultId(result);
                   return (
-                  <TableRow key={resultId}>
-                    <div>
-                      <strong style={{ textTransform: 'capitalize' }}>
-                        {result.testType} Test
-                      </strong>
-                    </div>
+                    <TableRow key={resultId}>
+                      <div>
+                        <strong style={{ textTransform: 'capitalize' }}>
+                          {result.testType} Test
+                        </strong>
+                      </div>
 
-                    <div>{formatDate(result.createdAt)}</div>
+                      <div>{formatDate(result.createdAt)}</div>
 
-                    <div>
-                      <Badge color={result.result.hasDyslexia ? 'warning' : 'success'}>
-                        {result.result.hasDyslexia ? 'Indicators Found' : 'No Indicators'}
-                      </Badge>
-                    </div>
+                      <div>
+                        <Badge color={result.result.hasDyslexia ? 'warning' : 'success'}>
+                          {result.result.hasDyslexia ? 'Indicators Found' : 'No Indicators'}
+                        </Badge>
+                      </div>
 
-                    <div>{result.result.confidence ? `${result.result.confidence}%` : 'N/A'}</div>
+                      <div>{result.result.confidence ? `${result.result.confidence}%` : 'N/A'}</div>
 
-                    <ActionButtons>
-                      <Button 
-                        as={Link}
-                        to={`/test-result/${resultId}`}
-                        variant="secondary"
-                        style={{ padding: '8px 16px', fontSize: '14px' }}
-                      >
-                        View
-                      </Button>
-                      <Button 
-                        onClick={() => handleDownloadPDF(resultId)}
-                        variant="primary"
-                        style={{ padding: '8px 16px', fontSize: '14px' }}
-                      >
-                        Download PDF
-                      </Button>
-                      <Button
-                        onClick={() => handleDelete(resultId)}
-                        variant="danger"
-                        disabled={deletingIds.includes(resultId)}
-                        style={{ padding: '8px 16px', fontSize: '14px' }}
-                      >
-                        {deletingIds.includes(resultId) ? 'Deleting…' : 'Delete'}
-                      </Button>
-                    </ActionButtons>
-                  </TableRow>
+                      <ActionButtons>
+                        <Button
+                          as={Link}
+                          to={`/test-result/${resultId}`}
+                          variant="secondary"
+                          style={{ padding: '8px 16px', fontSize: '14px' }}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          onClick={() => handleDownloadPDF(resultId)}
+                          variant="primary"
+                          style={{ padding: '8px 16px', fontSize: '14px' }}
+                        >
+                          Download PDF
+                        </Button>
+                        <Button
+                          onClick={() => handleDelete(resultId)}
+                          variant="danger"
+                          disabled={deletingIds.includes(resultId)}
+                          style={{ padding: '8px 16px', fontSize: '14px' }}
+                        >
+                          {deletingIds.includes(resultId) ? 'Deleting…' : 'Delete'}
+                        </Button>
+                      </ActionButtons>
+                    </TableRow>
                   );
                 })}
               </ResultsTable>

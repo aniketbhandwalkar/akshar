@@ -41,7 +41,7 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     const doc = new jsPDF();
     
     // Set font
-    doc.setFont('helvetica');
+    doc.setFont('Baskerville');
     
     // HEADER SECTION
     doc.setFillColor(248, 250, 252);
@@ -52,13 +52,13 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     doc.setLineWidth(0.5);
     doc.line(0, 45, 210, 45);
     
-    // Logo placeholder (circular design)
-    doc.setFillColor(52, 73, 81);
-    doc.circle(27.5, 22.5, 12, 'F');
-    doc.setTextColor(255, 255, 255);
+    // Add logo image
+    const logoPath = process.env.PUBLIC_URL + '/images/logo_akshar.png';
+    doc.addImage(logoPath, 'PNG', 15, 10, 25, 25);  
+    doc.setTextColor(52, 73, 81);
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('A', 25, 27);
+    doc.setFont('Baskerville', 'bold');
+    
     
     // Company branding
     doc.setTextColor(52, 73, 81);
@@ -333,7 +333,6 @@ const generateEnhancedPDF = async (testResult: TestResult, user: User) => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(52, 73, 81);
     doc.text('AKSHAR - Professional Dyslexia Assessment System', 20, footerY + 8);
-    
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(107, 114, 128);

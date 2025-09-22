@@ -31,6 +31,7 @@ const ResultCard = styled(Card)`
 
 const SectionCard = styled(Card)`
   margin-bottom: 20px;
+  background: #d1e2f3ff;
 `;
 
 const ScoreSection = styled.div`
@@ -136,14 +137,14 @@ const TestResultPage: React.FC = () => {
           <ResultCard>
             <FlexContainer justify="space-between" align="center" style={{ marginBottom: '30px' }}>
               <div>
-                <Title style={{ marginBottom: '10px' }}>📊 Test Result</Title>
+                <Title style={{ marginBottom: '10px' }}>Test Result</Title>
                 <Text style={{ color: '#6b7280', marginBottom: 0 }}>
                   {testResult.testType === 'screener' ? 'Smart Screener' : 'Eye Tracking'} Test • {formatDate(testResult.createdAt)}
                 </Text>
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <Button onClick={handleDownloadPDF} variant="primary">
-                  📄 Download PDF
+                   Download PDF
                 </Button>
                 <Button as={Link} to="/dashboard" variant="secondary">
                   ← Back
@@ -168,18 +169,18 @@ const TestResultPage: React.FC = () => {
             </ScoreSection>
 
             <SectionCard>
-              <Subtitle>🔍 Analysis</Subtitle>
+              <Subtitle> Analysis</Subtitle>
               <Text>{testResult.result.reasoning}</Text>
             </SectionCard>
 
             <SectionCard>
-              <Subtitle>💡 Recommendations</Subtitle>
+              <Subtitle> Recommendations</Subtitle>
               <Text>{testResult.result.advice}</Text>
             </SectionCard>
 
             {testResult.nearestDoctor && (
               <SectionCard>
-                <Subtitle>🏥 Recommended Specialist</Subtitle>
+                <Subtitle> Recommended Specialist</Subtitle>
                 <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px' }}>
                   <Text style={{ marginBottom: '5px' }}>
                     <strong>Dr. {testResult.nearestDoctor.name}</strong>

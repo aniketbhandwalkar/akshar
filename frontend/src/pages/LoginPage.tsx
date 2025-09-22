@@ -81,7 +81,7 @@ const LoginPage: React.FC = () => {
         <Container>
           <LoginCard hover>
             <Title gradient animated style={{ textAlign: 'center', marginBottom: '30px' }}>
-              🔐 Welcome Back
+              Welcome Back
             </Title>
             
             <Form onSubmit={handleSubmit}>
@@ -119,7 +119,7 @@ const LoginPage: React.FC = () => {
                   disabled={loading}
                   style={{ width: '100%' }}
                 >
-                  {loading ? <LoadingSpinner /> : '🚀 Sign In'}
+                  {loading ? <LoadingSpinner /> : ' Sign In'}
                 </Button>
               </FormGroup>
             </Form>
