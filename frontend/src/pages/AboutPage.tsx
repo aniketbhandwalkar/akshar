@@ -116,7 +116,11 @@ const FeatureCard = styled(Card)`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   border: 1px solid #e2e8f0;
-  
+  display: flex;
+  flex-direction: column;
+  /* ensure cards have consistent height so actions align */
+  min-height: 420px;
+
   &:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
@@ -163,7 +167,7 @@ const FeatureDescription = styled.p`
 `;
 
 const FeatureActions = styled.div`
-  margin-top: 18px;
+  margin-top: auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -313,7 +317,7 @@ const AboutPage: React.FC = () => {
               <FeatureActions>
                 <a href={LINKEDIN_URL_LUCKY} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                   <Button variant="primary" size="small" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="16" height="16" viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M4.98 3.5C4.98 4.88071 3.88071 6 2.5 6C1.11929 6 0 4.88071 0 3.5C0 2.11929 1.11929 1 2.5 1C3.88071 1 4.98 2.11929 4.98 3.5Z" fill="currentColor" />
                       <path d="M0.5 8H4.5V23H0.5V8Z" fill="currentColor" />
                       <path d="M8.5 8H12.1V10.1H12.2C12.9 9 14.6 7.8 17.1 7.8C21.7 7.8 22 10.9 22 15.3V23H18V15.9C18 14.3 17.9 12.2 15 12.2C12.1 12.2 11.6 14.1 11.6 15.8V23H8.5V8Z" fill="currentColor" />
